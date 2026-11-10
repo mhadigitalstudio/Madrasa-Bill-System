@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madrasa Bill & Database System</title>
+    
+    <!-- Custom App Icon & PWA Manifest Settings -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+      %22name%22: %22Developed by MHA%22 ,
+      %22short_name%22: %22Madrasa Bill%22,
+      %22start_url%22: %22.%22,
+      %22display%22: %22standalone%22,
+      %22background_color%22: %22%23f0f2f5%22,
+      %22theme_color%22: %22%232c3e50%22,
+      %22icons%22: [
+        {
+          %22src%22: %22icon.png%22,
+          %22sizes%22: %22512x512%22,
+          %22type%22: %22image/png%22
+        }
+      ]
+    }">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Nastaliq Urdu', Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #000;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Top Header with Hamburger Menu */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .app-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .menu-icon-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            z-index: 1001;
+            width: 220px;
+            padding: 8px;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-dropdown .tab-btn {
+            display: block;
+            width: 100%;
+            background-color: #ffffff;
+            color: #2c3e50;
+            border: none;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Noto Nastaliq Urdu', Arial, sans-serif;
+            font-weight: bold;
+            font-size: 13px;
+            text-align: right;
+            transition: background 0.2s;
+        }
+
+        .menu-dropdown .tab-btn:hover {
+            background-color: #f1f2f6;
+        }
+
+        .menu-dropdown .tab-btn.active {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        h3 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            padding: 7px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: 'Noto Nastaliq Urdu', Arial, sans-serif;
+            font-size: 13px;
+        }
+
+        .btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Noto Nastaliq Urdu', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #219653;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        table.data-table th, table.data-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: center;
+        }
+
+        table.data-table th {
+            background-color: #f3d1b0;
+            color: #000;
+        }
+
+        table.data-table th:nth-child(1), table.data-table td:nth-child(1) { width: 45px; }
+        table.data-table th:nth-child(2), table.data-table td:nth-child(2) { font-size: 10.5px; white-space: nowrap; }
+        table.data-table th:nth-child(6), table.data-table td:nth-child(6) { width: 55px; }
+
+        .summary-box {
+            margin-top: 15px;
+            background: #fdf3e6;
+            border: 1px solid #f3d1b0;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 2.2;
+        }
+
+        .summary-box h4 {
+            margin-bottom: 8px;
+            color: #d35400;
+            font-size: 14px;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            max-width: 350px;
+            border-bottom: 1px dashed #e0c2a0;
+            padding-bottom: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .page-container {
+            width: 210mm;
+            height: 297mm;
+            max-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            padding: 6mm;
+            gap: 4mm;
+            page-break-after: always;
+            page-break-inside: avoid;
+            overflow: hidden;
+        }
+
+        .bill-card {
+            border: 1px solid #000;
+            padding: 3mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #fff;
+            height: 132mm;
+            max-height: 132mm;
+            overflow: hidden;
+        }
+
+        .bill-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 2px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1px;
+        }
+
+        .bill-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            margin-bottom: 1px;
+            font-weight: bold;
+        }
+
+        .bill-moarif {
+            font-size: 8px;
+            margin-bottom: 2px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1px;
+            font-weight: bold;
+        }
+
+        table.bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7.5px;
+            margin-bottom: 2px;
+        }
+
+        table.bill-table th, table.bill-table td {
+            border: 1px solid #000;
+            text-align: center;
+            padding: 1px 2px;
+        }
+
+        table.bill-table th {
+            background-color: #f3d1b0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            font-weight: bold;
+        }
+
+        .total-row {
+            background-color: #f3d1b0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            font-weight: bold;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2px;
+            font-size: 7.5px;
+            font-weight: bold;
+            padding-top: 1px;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                background: none;
+                padding: 0;
+            }
+            .no-print, .app-header, .menu-dropdown, .modal-header-actions, .floating-down-btn {
+                display: none !important;
+            }
+            .modal {
+                position: static;
+                background: none;
+                padding: 0;
+            }
+            .modal-content-area {
+                display: block;
+            }
+            .page-container {
+                box-shadow: none;
+                margin: 0;
+                width: 210mm;
+                height: 297mm;
+                max-height: 297mm;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Beautiful Password Login Screen -->
+    <div id="loginScreen" class="container" style="max-width: 420px; margin: 60px auto; padding: 25px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-top: 5px solid #2c3e50; display: none;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #2c3e50; font-size: 20px; margin-bottom: 5px;">دارالعلوم رحمانیه</h2>
+            <p style="font-size: 12px; color: #7f8c8d; font-weight: bold;">مدرسہ بل اور ڈیٹا بیس سسٹم</p>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label style="color: #34495e;">پاسورڈ درج کریں:</label>
+            <input type="password" id="loginPassword" placeholder="پاسورڈ لکھیں" style="padding: 10px; border-radius: 6px;">
+        </div>
+        
+        <button class="btn" style="width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; background: #2c3e50; margin-bottom: 12px;" onclick="checkLogin()">داخل ہوں</button>
+        
+        <div style="text-align: center;">
+            <span style="font-size: 11px; color: #e74c3c; cursor: pointer; font-weight: bold;" onclick="openForgetModal()">پاسورڈ بھول گئے؟ (Forget Password)</span>
+        </div>
+
+        <div style="text-align: center; margin-top: 25px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #95a5a6; font-weight: bold;">
+            Developed by MHA
+        </div>
+    </div>
+
+    <!-- Forget Password Modal -->
+    <div id="forgetModal" class="modal">
+        <div class="container" style="max-width: 400px; margin: 60px auto; padding: 20px; border-radius: 10px;">
+            <h3>پاسورڈ بازیافت (Forgot Password)</h3>
+            <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">اپنا وہی منظور شدہ نمبر درج کریں جو پاسورڈ بناتے وقت دیا گیا تھا۔</p>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>نمبر (ID No):</label>
+                <input type="text" id="forgetAadhaarInput" placeholder="نمبر درج کریں">
+            </div>
+            <div id="recoveredPassResult" style="margin-bottom: 15px; font-weight: bold; font-size: 13px; text-align: center; color: #27ae60;"></div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeForgetModal()">بند کریں</button>
+                <button class="btn" style="background-color: #2980b9;" onclick="recoverPassword()">پاسورڈ معلوم کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div id="mainApp" class="container no-print">
+        
+        <!-- App Header with Hamburger Menu -->
+        <div class="app-header">
+            <h2>مدرسہ بل اور ڈیٹا بیس سسٹم</h2>
+            <div style="position: relative;">
+                <button class="menu-icon-btn" onclick="toggleMenu(event)">☰</button>
+                <div id="menuDropdown" class="menu-dropdown">
+                    <button class="tab-btn active" onclick="switchTab('entryTab')">روزانہ انٹری</button>
+                    <button class="tab-btn" onclick="switchTab('dbTab')">ڈیٹا بیس اور بل</button>
+                    <button class="tab-btn" onclick="switchTab('bankEntryTab')">بینک انٹری (SB/CD)</button>
+                    <button class="tab-btn" onclick="switchTab('bankDbTab')">بینک ڈیٹا بیس</button>
+                    <button class="tab-btn" onclick="switchTab('totalsTab')">کل ٹوٹل رپورٹ (Totals)</button>
+                    <button class="tab-btn" onclick="switchTab('settingsTab')">سیٹنگز</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Entry Tab -->
+        <div id="entryTab" class="section-content active">
+            <h3>نیا خرچہ درج کریں (نقد)</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>تاریخ:</label>
+                    <input type="date" id="entryDate">
+                </div>
+                <div class="form-group">
+                    <label>نام اشیاء:</label>
+                    <input type="text" id="entryItem" placeholder="مثال: گوشت">
+                </div>
+                <div class="form-group">
+                    <label>مد (Dropdown):</label>
+                    <select id="entryMod">
+                        <option value="">-- مد منتخب کریں --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>قیمت:</label>
+                    <input type="number" id="entryPrice" placeholder="مثال: 300">
+                </div>
+            </div>
+            <button class="btn" onclick="addEntry()">انٹری محفوظ کریں</button>
+        </div>
+
+        <!-- Database Tab -->
+        <div id="dbTab" class="section-content">
+            <div id="topAnchor"></div>
+
+            <h3>خرچہ کا ریکارڈ اور بل جنریشن (نقد)</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>از تاریخ:</label>
+                    <input type="date" id="filterStartDate" oninput="filterData()">
+                </div>
+                <div class="form-group">
+                    <label>تا تاریخ:</label>
+                    <input type="date" id="filterEndDate" oninput="filterData()">
+                </div>
+                <div class="form-group">
+                    <label>مد کے لحاظ سے فلٹر:</label>
+                    <select id="filterMod" onchange="filterData()">
+                        <option value="">-- تمام مدات --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تلاش کریں (Search Item):</label>
+                    <input type="text" id="searchKeyword" placeholder="اشیائے نام لکھیں..." oninput="filterData()">
+                </div>
+            </div>
+
+            <div class="form-row" style="background: #fdf3e6; padding: 10px; border-radius: 6px; border: 1px solid #f3d1b0; align-items: flex-end;">
+                <div class="form-group">
+                    <label>ماہانہ / سالانہ رپورٹ (Month Report):</label>
+                    <input type="month" id="reportMonthInput" onchange="filterByMonth()">
+                </div>
+                <div class="form-group">
+                    <button class="btn" style="background-color: #8e44ad;" onclick="resetReportFilter()">تمام ریکارڈ دیکھیں</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn" style="background-color: #e67e22;" onclick="openPdfModal()">PDF / بل پرنٹ کریں (10 Items/Bill)</button>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>تاریخ</th>
+                        <th>نام اشیاء</th>
+                        <th>مد</th>
+                        <th>قیمت</th>
+                        <th>عمل</th>
+                    </tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+
+            <div class="summary-box" id="summaryBox">
+                <h4>فلٹر شدہ خلاصہ (Summary):</h4>
+                <div id="summaryContent">کل خرچہ: 0</div>
+            </div>
+
+            <div id="bottomAnchor"></div>
+        </div>
+
+        <!-- Bank Entry Tab -->
+        <div id="bankEntryTab" class="section-content">
+            <h3>نیا بینک خرچہ درج کریں (SB / CD)</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>تاریخ:</label>
+                    <input type="date" id="bankEntryDate">
+                </div>
+                <div class="form-group">
+                    <label>اکاؤنٹ:</label>
+                    <select id="bankEntryAcc">
+                        <option value="SB">SB</option>
+                        <option value="CD">CD</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>نام اشیاء:</label>
+                    <input type="text" id="bankEntryItem" placeholder="مثال: چائے">
+                </div>
+                <div class="form-group">
+                    <label>مد (Dropdown):</label>
+                    <select id="bankEntryMod">
+                        <option value="">-- مد منتخب کریں --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>قیمت:</label>
+                    <input type="number" id="bankEntryPrice" placeholder="مثال: 500">
+                </div>
+            </div>
+            <button class="btn" onclick="addBankEntry()">بینک انٹری محفوظ کریں</button>
+        </div>
+
+        <!-- Bank Database Tab -->
+        <div id="bankDbTab" class="section-content">
+            <div id="bankTopAnchor"></div>
+
+            <h3>بینک خرچہ کا ریکارڈ اور بل جنریشن (SB / CD)</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>از تاریخ:</label>
+                    <input type="date" id="bankFilterStartDate" oninput="filterBankData()">
+                </div>
+                <div class="form-group">
+                    <label>تا تاریخ:</label>
+                    <input type="date" id="bankFilterEndDate" oninput="filterBankData()">
+                </div>
+                <div class="form-group">
+                    <label>اکاؤنٹ فلٹر:</label>
+                    <select id="bankFilterAcc" onchange="filterBankData()">
+                        <option value="">-- تمام اکاؤنٹس --</option>
+                        <option value="SB">SB</option>
+                        <option value="CD">CD</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>مد کے لحاظ سے فلٹر:</label>
+                    <select id="bankFilterMod" onchange="filterBankData()">
+                        <option value="">-- تمام مدات --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تلاش کریں (Search Item):</label>
+                    <input type="text" id="bankSearchKeyword" placeholder="اشیائے نام لکھیں..." oninput="filterBankData()">
+                </div>
+            </div>
+
+            <div class="form-row" style="background: #fdf3e6; padding: 10px; border-radius: 6px; border: 1px solid #f3d1b0; align-items: flex-end;">
+                <div class="form-group">
+                    <label>ماہانہ / سالانہ رپورٹ (Month Report):</label>
+                    <input type="month" id="bankReportMonthInput" onchange="filterBankByMonth()">
+                </div>
+                <div class="form-group">
+                    <button class="btn" style="background-color: #8e44ad;" onclick="resetBankReportFilter()">تمام ریکارڈ دیکھیں</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn" style="background-color: #e67e22;" onclick="openBankPdfModal()">PDF / بل پرنٹ کریں (10 Items/Bill)</button>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>تاریخ</th>
+                        <th>اکاؤنٹ</th>
+                        <th>نام اشیاء</th>
+                        <th>مد</th>
+                        <th>قیمت</th>
+                        <th>عمل</th>
+                    </tr>
+                </thead>
+                <tbody id="bankDbTableBody"></tbody>
+            </table>
+
+            <div class="summary-box" id="bankSummaryBox">
+                <h4>فلٹر شدہ خلاصہ (Summary):</h4>
+                <div id="bankSummaryContent">کل خرچہ: 0</div>
+            </div>
+
+            <div id="bankBottomAnchor"></div>
+        </div>
+
+        <!-- Totals & Master Summary Tab -->
+        <div id="totalsTab" class="section-content">
+            <h3>کل خرچہ رپورٹ (نقد اور بینک مجموعی)</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>از تاریخ:</label>
+                    <input type="date" id="masterFilterStartDate" oninput="renderMasterTotals()">
+                </div>
+                <div class="form-group">
+                    <label>تا تاریخ:</label>
+                    <input type="date" id="masterFilterEndDate" oninput="renderMasterTotals()">
+                </div>
+                <div class="form-group">
+                    <label>ماہانہ رپورٹ (Month Report):</label>
+                    <input type="month" id="masterFilterMonth" oninput="renderMasterMonthFilter()">
+                </div>
+                <div class="form-group">
+                    <label>مد کے لحاظ سے فلٹر:</label>
+                    <select id="masterFilterMod" onchange="renderMasterTotals()">
+                        <option value="">-- تمام مدات --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="align-items: flex-end;">
+                <div class="form-group">
+                    <button class="btn" style="background-color: #8e44ad;" onclick="resetMasterFilters()">فلٹر صاف کریں (Reset)</button>
+                </div>
+            </div>
+
+            <div class="summary-box" id="masterSummaryBox" style="margin-top: 20px;">
+                <h4>مجموعی خلاصہ (Master Totals):</h4>
+                <div id="masterSummaryContent"></div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="section-content">
+            <h3>سسٹم اور بل سیٹنگز</h3>
+            
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>نئی مد (Category) شامل کریں:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newModInput" placeholder="مثال: مطبخ، سفر، تعمیر">
+                    <button class="btn" style="background-color: #27ae60;" onclick="addCategory()">مد شامل کریں</button>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>موجودہ مدات کی فہرست:</label>
+                <div id="modListContainer" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;"></div>
+            </div>
+
+            <hr style="margin: 15px 0;">
+
+            <h3>ڈیٹا بیک اپ (Export / Import)</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                <button class="btn" style="background-color: #2980b9;" onclick="openExportModal()">بیک اپ فائل ڈاؤن لوڈ کریں (Export)</button>
+                
+                <div style="display: inline-flex; align-items: center; gap: 5px;">
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importDataFile(event)">
+                    <button class="btn" style="background-color: #8e44ad;" onclick="document.getElementById('importFile').click()">بیک اپ امپورٹ کریں (Import)</button>
+                </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button class="btn" style="background-color: #e67e22;" onclick="openImportHistoryModal()">امپورٹ ہسٹری دیکھیں (Import History)</button>
+            </div>
+
+            <hr style="margin: 15px 0;">
+
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>بل کی ہیڈنگ (Bill Heading):</label>
+                <input type="text" id="settingBillHeading" value="بل بنام دارالعلوم رحمانیہ سلیالو کوریگام قاضی گنڈ">
+            </div>
+            <button class="btn" style="background-color: #2980b9; margin-bottom: 20px;" onclick="saveHeading()">ہیڈنگ محفوظ کریں</button>
+
+            <hr style="margin: 15px 0;">
+
+            <h3>پاسورڈ اور سیکیورٹی سیٹنگز</h3>
+            <div class="form-group" id="currentPasswordGroup" style="margin-bottom: 10px; display: none;">
+                <label>موجودہ پاسورڈ (Current Password):</label>
+                <input type="password" id="currentPassword" placeholder="پرانا پاسورڈ درج کریں">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>نیا پاسورڈ (خالی چھوڑنے پر پاسورڈ آف ہو جائے گا):</label>
+                <input type="password" id="newPassword" placeholder="نیا پاسورڈ درج کریں">
+            </div>
+            <button class="btn" style="background-color: #8e44ad; margin-bottom: 15px;" onclick="changePassword()">پاسورڈ محفوظ کریں</button>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>نمبر (ID No):</label>
+                <input type="text" id="settingAadhaarInput" placeholder="نمبر درج کریں">
+            </div>
+            <button class="btn" style="background-color: #2980b9; margin-bottom: 20px;" onclick="updateAadhaarNo()">نمبر اپڈیٹ کریں</button>
+            
+            <hr style="margin: 15px 0;">
+
+            <h3>فیکٹری ری سیٹ (Admin Reset)</h3>
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label>ADMIN پاسورڈ درج کریں (ڈیٹا صاف کرنے کے لیے):</label>
+                <input type="password" id="adminPassword" placeholder="ADMIN پاسورڈ">
+            </div>
+            <button class="btn btn-danger" onclick="adminReset()" style="margin-bottom: 15px;">تمام ڈیٹا ری سیٹ (Delete All) کریں</button>
+
+            <div style="text-align: center; margin-top: 25px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 12px; color: #7f8c8d; font-weight: bold;">
+                Developed by MHA
+            </div>
+        </div>
+    </div>
+
+    <!-- ChatGPT Style Floating Centered Smart Arrow Button -->
+    <button id="floatingDownBtn" class="floating-down-btn no-print" onclick="handleSmartScroll()" style="display: none; position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 999; background-color: rgba(44, 62, 80, 0.9); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); align-items: center; justify-content: center; transition: background 0.2s;">
+        ↓
+    </button>
+
+    <!-- Import History Modal -->
+    <div id="importHistoryModal" class="modal">
+        <div class="container" style="max-width: 600px; margin: 30px auto;">
+            <h3>امپورٹ ہسٹری (Imported Files History)</h3>
+            <div id="historyListContainer" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;"></div>
+            <div style="text-align: right;">
+                <button class="btn btn-danger" onclick="closeImportHistoryModal()">بند کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Date Range & Name Modal -->
+    <div id="exportModal" class="modal">
+        <div class="container" style="max-width: 400px; margin: 50px auto;">
+            <h3>بیک اپ ایکسپورٹ کی تفصیلات</h3>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>ریکارڈ کی قسم منتخب کریں:</label>
+                <select id="exportTypeSelect">
+                    <option value="naqd">نقد (Cash Records)</option>
+                    <option value="bank">بینک (Bank Records)</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>اپنا نام درج کریں (Your Name):</label>
+                <input type="text" id="exportUserName" placeholder="مثال: Aijaz">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>از تاریخ (Start Date - اختیاری):</label>
+                <input type="date" id="exportStartDate">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>تا تاریخ (End Date - اختیاری):</label>
+                <input type="date" id="exportEndDate">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeExportModal()">منسوخ کریں</button>
+                <button class="btn" style="background-color: #2980b9;" onclick="confirmExportData()">ڈاؤن لوڈ کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Generation Options Modal -->
+    <div id="pdfModal" class="modal">
+        <div class="container" style="max-width: 450px; margin: 40px auto;">
+            <h3>بل جنریشن کی تفصیلات</h3>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>از تاریخ:</label>
+                <input type="date" id="pdfStartDate">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>تا تاریخ:</label>
+                <input type="date" id="pdfEndDate">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>معرفت:</label>
+                <input type="text" id="pdfMoarif" value="حافظ اعجاز سلیمان صاحب مدرس مدرسہ">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>شروع بل نمبر (Start Bill No):</label>
+                <input type="number" id="pdfStartBillNo" value="1">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closePdfModal()">منسوخ کریں</button>
+                <button class="btn" onclick="generateBillsPDF()">بل دیکھیں / پرنٹ کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank PDF Generation Options Modal -->
+    <div id="bankPdfModal" class="modal">
+        <div class="container" style="max-width: 450px; margin: 40px auto;">
+            <h3>بینک بل جنریشن کی تفصیلات</h3>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>از تاریخ:</label>
+                <input type="date" id="bankPdfStartDate">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>تا تاریخ:</label>
+                <input type="date" id="bankPdfEndDate">
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>اکاؤنٹ فلٹر:</label>
+                <select id="bankPdfAcc">
+                    <option value="">-- تمام اکاؤنٹس --</option>
+                    <option value="SB">SB</option>
+                    <option value="CD">CD</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>معرفت:</label>
+                <input type="text" id="bankPdfMoarif" value="حافظ اعجاز سلیمان صاحب مدرس مدرسہ">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>شروع بل نمبر (Start Bill No):</label>
+                <input type="number" id="bankPdfStartBillNo" value="1">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeBankPdfModal()">منسوخ کریں</button>
+                <button class="btn" onclick="generateBankBillsPDF()">بل دیکھیں / پرنٹ کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Bills Preview Modal -->
+    <div id="billPreviewModal" class="modal" style="background: rgba(0,0,0,0.8);">
+        <div class="modal-header-actions" style="text-align: right; padding: 10px; background: #2c3e50; max-width: 950px; margin: 0 auto; border-radius: 6px 6px 0 0;">
+            <button class="btn btn-danger" onclick="closeBillPreview()">بند کریں</button>
+            <button class="btn" style="background-color: #27ae60; margin-right: 10px;" onclick="window.print()">پرنٹ / رنگین PDF ڈاؤن لوڈ کریں</button>
+        </div>
+        <div id="billsArea" class="modal-content-area" style="background: #555; padding: 10px;"></div>
+    </div>
+
+    <!-- Aadhaar Setup Modal when setting new password -->
+    <div id="aadhaarPromptModal" class="modal">
+        <div class="container" style="max-width: 400px; margin: 65px auto; padding: 20px; border-radius: 10px;">
+            <h3>نمبر درج کریں (ID No)</h3>
+            <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">نیا پاسورڈ سیٹ کرنے کے لیے براہ کرم اپنا نمبر درج کریں (جو پاسورڈ بھولنے کی صورت میں کام آئے گا):</p>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>نمبر:</label>
+                <input type="text" id="modalAadhaarInput" placeholder="نمبر لکھیں">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeAadhaarPromptModal()">منسوخ کریں</button>
+                <button class="btn" style="background-color: #27ae60;" onclick="confirmAndSavePasswordWithAadhaar()">محفوظ کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Verification Modal for Password Change -->
+    <div id="passChangeModal" class="modal">
+        <div class="container" style="max-width: 400px; margin: 65px auto; padding: 20px; border-radius: 10px;">
+            <h3>پرانا پاسورڈ تصدیق</h3>
+            <p style="font-size: 12px; color: #555; text-align: center; margin-bottom: 15px;">نیا پاسورڈ سیٹ کرنے کے لیے براہ کرم اپنا موجودہ پرانا پاسورڈ درج کریں:</p>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>پرانا پاسورڈ:</label>
+                <input type="password" id="modalVerifyOldPass" placeholder="پرانا پاسورڈ لکھیں">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closePassChangeModal()">منسوخ کریں</button>
+                <button class="btn" style="background-color: #27ae60;" onclick="verifyAndSavePassword()">تصدیق کریں</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let database = JSON.parse(localStorage.getItem('madrasa_db')) || [];
+        let bankDatabase = JSON.parse(localStorage.getItem('madrasa_bank_db')) || [];
+        let categories = JSON.parse(localStorage.getItem('madrasa_cats')) || ["مطبخ", "سفر", "تعمیر", "كتب خانہ"];
+        let importHistory = JSON.parse(localStorage.getItem('madrasa_import_history')) || [];
+        let appPassword = localStorage.getItem('madrasa_pass') || '';
+        let appAadhaar = localStorage.getItem('madrasa_aadhaar') || '';
+        let customHeading = localStorage.getItem('madrasa_heading') || 'بل بنام دارالعلوم رحمانیہ سلیالو کوریگام قاضی گنڈ';
+
+        document.getElementById('entryDate').valueAsDate = new Date();
+        document.getElementById('bankEntryDate').valueAsDate = new Date();
+        document.getElementById('settingBillHeading').value = customHeading;
+        document.getElementById('settingAadhaarInput').value = appAadhaar;
+
+        function formatDateUK(dateStr) {
+            if (!dateStr) return '';
+            let parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return dateStr;
+        }
+
+        window.onload = function() {
+            if(appPassword && appPassword !== '') {
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('mainApp').style.display = 'none';
+            } else {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                renderTable(database);
+                renderBankTable(bankDatabase);
+                updateCategoryDropdowns();
+            }
+        };
+
+        // Close hamburger menu when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.menu-icon-btn') && !event.target.closest('.menu-dropdown')) {
+                let dropdown = document.getElementById('menuDropdown');
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        };
+
+        function toggleMenu(event) {
+            event.stopPropagation();
+            let dropdown = document.getElementById('menuDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        window.onscroll = function() {
+            let dbTabActive = document.getElementById('dbTab').classList.contains('active');
+            let bankDbTabActive = document.getElementById('bankDbTab').classList.contains('active');
+            let floatingBtn = document.getElementById('floatingDownBtn');
+            
+            if (dbTabActive || bankDbTabActive) {
+                let activeScrollY = window.scrollY;
+                if (activeScrollY > 150) {
+                    floatingBtn.style.display = 'flex';
+                    let totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    if (activeScrollY >= totalHeight - 200) {
+                        floatingBtn.innerHTML = '↑'; 
+                    } else {
+                        floatingBtn.innerHTML = '↓'; 
+                    }
+                } else {
+                    floatingBtn.style.display = 'none';
+                }
+            } else {
+                floatingBtn.style.display = 'none';
+            }
+        };
+
+        function checkLogin() {
+            let pass = document.getElementById('loginPassword').value;
+            if(pass === appPassword) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                renderTable(database);
+                renderBankTable(bankDatabase);
+                updateCategoryDropdowns();
+            } else {
+                alert('غلط پاسورڈ! دوبارہ کوشش کریں۔');
+            }
+        }
+
+        function openForgetModal() {
+            document.getElementById('forgetAadhaarInput').value = '';
+            document.getElementById('recoveredPassResult').innerHTML = '';
+            document.getElementById('forgetModal').style.display = 'block';
+        }
+
+        function closeForgetModal() {
+            document.getElementById('forgetModal').style.display = 'none';
+        }
+
+        function recoverPassword() {
+            let enteredAadhaar = document.getElementById('forgetAadhaarInput').value.trim();
+            let resultDiv = document.getElementById('recoveredPassResult');
+            
+            if(!enteredAadhaar) {
+                resultDiv.style.color = '#e74c3c';
+                resultDiv.innerHTML = 'براہ کرم نمبر درج کریں!';
+                return;
+            }
+
+            if(enteredAadhaar === appAadhaar) {
+                resultDiv.style.color = '#27ae60';
+                resultDiv.innerHTML = `آپ کا پاسورڈ یہ ہے: <strong>${appPassword}</strong>`;
+            } else {
+                resultDiv.style.color = '#e74c3c';
+                resultDiv.innerHTML = 'درج کردہ نمبر غلط ہے!';
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.menu-dropdown .tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.section-content').forEach(content => content.classList.remove('active'));
+            
+            let floatingBtn = document.getElementById('floatingDownBtn');
+            let dropdown = document.getElementById('menuDropdown');
+            if (dropdown) dropdown.classList.remove('show');
+
+            if(tabId === 'entryTab') {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[0].classList.add('active');
+                document.getElementById('entryTab').classList.add('active');
+                updateCategoryDropdowns();
+                floatingBtn.style.display = 'none';
+            } else if(tabId === 'dbTab') {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[1].classList.add('active');
+                document.getElementById('dbTab').classList.add('active');
+                updateCategoryDropdowns();
+                renderTable(database);
+                
+                if (window.scrollY > 150) {
+                    floatingBtn.style.display = 'flex';
+                } else {
+                    floatingBtn.style.display = 'none';
+                }
+            } else if(tabId === 'bankEntryTab') {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[2].classList.add('active');
+                document.getElementById('bankEntryTab').classList.add('active');
+                updateCategoryDropdowns();
+                floatingBtn.style.display = 'none';
+            } else if(tabId === 'bankDbTab') {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[3].classList.add('active');
+                document.getElementById('bankDbTab').classList.add('active');
+                updateCategoryDropdowns();
+                renderBankTable(bankDatabase);
+                
+                if (window.scrollY > 150) {
+                    floatingBtn.style.display = 'flex';
+                } else {
+                    floatingBtn.style.display = 'none';
+                }
+            } else if(tabId === 'totalsTab') {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[4].classList.add('active');
+                document.getElementById('totalsTab').classList.add('active');
+                updateCategoryDropdowns();
+                renderMasterTotals();
+                floatingBtn.style.display = 'none';
+            } else {
+                document.querySelectorAll('.menu-dropdown .tab-btn')[5].classList.add('active');
+                document.getElementById('settingsTab').classList.add('active');
+                renderCategoryList();
+                updateSettingsPasswordUI();
+                floatingBtn.style.display = 'none';
+            }
+        }
+
+        function updateSettingsPasswordUI() {
+            let currGroup = document.getElementById('currentPasswordGroup');
+            let aadhaarInput = document.getElementById('settingAadhaarInput');
+            aadhaarInput.value = appAadhaar;
+
+            if (appPassword && appPassword !== '') {
+                currGroup.style.display = 'flex';
+            } else {
+                currGroup.style.display = 'none';
+            }
+        }
+
+        function handleSmartScroll() {
+            let totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+            if (window.scrollY >= totalHeight - 200) {
+                document.getElementById('topAnchor').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('bankTopAnchor').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                document.getElementById('bottomAnchor').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('bankBottomAnchor').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function updateCategoryDropdowns() {
+            let select = document.getElementById('entryMod');
+            select.innerHTML = '<option value="">-- مد منتخب کریں --</option>';
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            let filterSelect = document.getElementById('filterMod');
+            let currentFilterVal = filterSelect.value;
+            filterSelect.innerHTML = '<option value="">-- تمام مدات --</option>';
+            categories.forEach(cat => {
+                let selected = (cat === currentFilterVal) ? 'selected' : '';
+                filterSelect.innerHTML += `<option value="${cat}" ${selected}>${cat}</option>`;
+            });
+
+            let bankSelect = document.getElementById('bankEntryMod');
+            bankSelect.innerHTML = '<option value="">-- مد منتخب کریں --</option>';
+            categories.forEach(cat => {
+                bankSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            let bankFilterSelect = document.getElementById('bankFilterMod');
+            let currentBankFilterVal = bankFilterSelect.value;
+            bankFilterSelect.innerHTML = '<option value="">-- تمام مدات --</option>';
+            categories.forEach(cat => {
+                let selected = (cat === currentBankFilterVal) ? 'selected' : '';
+                bankFilterSelect.innerHTML += `<option value="${cat}" ${selected}>${cat}</option>`;
+            });
+
+            let masterFilterSelect = document.getElementById('masterFilterMod');
+            let currentMasterFilterVal = masterFilterSelect.value;
+            masterFilterSelect.innerHTML = '<option value="">-- تمام مدات --</option>';
+            categories.forEach(cat => {
+                let selected = (cat === currentMasterFilterVal) ? 'selected' : '';
+                masterFilterSelect.innerHTML += `<option value="${cat}" ${selected}>${cat}</option>`;
+            });
+        }
+
+        function renderMasterTotals() {
+            let start = document.getElementById('masterFilterStartDate').value;
+            let end = document.getElementById('masterFilterEndDate').value;
+            let monthVal = document.getElementById('masterFilterMonth').value;
+            let selectedMod = document.getElementById('masterFilterMod').value;
+
+            let filteredNaqd = database.filter(row => {
+                if (start && row.date < start) return false;
+                if (end && row.date > end) return false;
+                if (monthVal && !row.date.startsWith(monthVal)) return false;
+                if (selectedMod && row.mod !== selectedMod) return false;
+                return true;
+            });
+
+            let filteredBank = bankDatabase.filter(row => {
+                if (start && row.date < start) return false;
+                if (end && row.date > end) return false;
+                if (monthVal && !row.date.startsWith(monthVal)) return false;
+                if (selectedMod && row.mod !== selectedMod) return false;
+                return true;
+            });
+
+            let naqdTotal = 0;
+            let naqdModTotals = {};
+            filteredNaqd.forEach(row => {
+                let p = parseFloat(row.price) || 0;
+                naqdTotal += p;
+                if (!naqdModTotals[row.mod]) naqdModTotals[row.mod] = 0;
+                naqdModTotals[row.mod] += p;
+            });
+
+            let bankTotal = 0;
+            let bankSbTotal = 0;
+            let bankCdTotal = 0;
+            let bankModTotals = {};
+            filteredBank.forEach(row => {
+                let p = parseFloat(row.price) || 0;
+                bankTotal += p;
+                if (row.acc === 'SB') bankSbTotal += p;
+                if (row.acc === 'CD') bankCdTotal += p;
+                if (!bankModTotals[row.mod]) bankModTotals[row.mod] = 0;
+                bankModTotals[row.mod] += p;
+            });
+
+            let grandTotal = naqdTotal + bankTotal;
+            let combinedMods = {};
+            categories.forEach(cat => {
+                let nVal = naqdModTotals[cat] || 0;
+                let bVal = bankModTotals[cat] || 0;
+                if (nVal > 0 || bVal > 0) {
+                    combinedMods[cat] = nVal + bVal;
+                }
+            });
+
+            let html = `
+                <div class="summary-line"><span>کل مجموعی خرچہ (نقد + بینک):</span> <span><strong>${grandTotal} روپے</strong></span></div>
+                <div class="summary-line"><span>کل نقد خرچہ (Cash):</span> <span><strong>${naqdTotal} روپے</strong></span></div>
+                <div class="summary-line"><span>کل بینک خرچہ (Bank):</span> <span><strong>${bankTotal} روپے</strong></span></div>
+                <div class="summary-line"><span>SB اکاؤنٹ کل خرچہ:</span> <span><strong>${bankSbTotal} روپے</strong></span></div>
+                <div class="summary-line"><span>CD اکاؤنٹ کل خرچہ:</span> <span><strong>${bankCdTotal} روپے</strong></span></div>
+                <h4 style="margin-top: 15px; color: #d35400; font-size: 14px;">مدات کے لحاظ سے کل میزان (Categories Totals):</h4>
+            `;
+
+            let hasMods = false;
+            for (let m in combinedMods) {
+                hasMods = true;
+                html += `<div class="summary-line"><span>${m}:</span> <span><strong>${combinedMods[m]} روپے</strong></span></div>`;
+            }
+            if (!hasMods) {
+                html += `<div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">کوئی مد موجود نہیں ہے</div>`;
+            }
+
+            document.getElementById('masterSummaryContent').innerHTML = html;
+        }
+
+        function renderMasterMonthFilter() {
+            document.getElementById('masterFilterStartDate').value = '';
+            document.getElementById('masterFilterEndDate').value = '';
+            renderMasterTotals();
+        }
+
+        function resetMasterFilters() {
+            document.getElementById('masterFilterStartDate').value = '';
+            document.getElementById('masterFilterEndDate').value = '';
+            document.getElementById('masterFilterMonth').value = '';
+            document.getElementById('masterFilterMod').value = '';
+            renderMasterTotals();
+        }
+
+        function addCategory() {
+            let catInput = document.getElementById('newModInput');
+            let catName = catInput.value.trim();
+            if(!catName) {
+                alert('براہ کرم مد کا نام درج کریں!');
+                return;
+            }
+            if(categories.includes(catName)) {
+                alert('یہ مد پہلے سے موجود ہے!');
+                return;
+            }
+            categories.push(catName);
+            localStorage.setItem('madrasa_cats', JSON.stringify(categories));
+            catInput.value = '';
+            renderCategoryList();
+            updateCategoryDropdowns();
+            alert('مد کامیابی سے شامل ہو گئی!');
+        }
+
+        function renderCategoryList() {
+            let container = document.getElementById('modListContainer');
+            container.innerHTML = '';
+            categories.forEach((cat, index) => {
+                container.innerHTML += `
+                    <span style="background: #e2e8f0; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px;">
+                        ${cat} 
+                        <button onclick="deleteCategory(${index})" style="background: #e74c3c; color: white; border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </span>
+                `;
+            });
+        }
+
+        function deleteCategory(index) {
+            if(confirm('کیا آپ اس مد کو حذف کرنا چاہتے ہیں؟')) {
+                categories.splice(index, 1);
+                localStorage.setItem('madrasa_cats', JSON.stringify(categories));
+                renderCategoryList();
+                updateCategoryDropdowns();
+            }
+        }
+
+        function addEntry() {
+            let date = document.getElementById('entryDate').value;
+            let item = document.getElementById('entryItem').value;
+            let mod = document.getElementById('entryMod').value;
+            let price = parseFloat(document.getElementById('entryPrice').value);
+
+            if(!date || !item || !mod || isNaN(price)) {
+                alert('براہ کرم تمام خانے اچھے سے پُر کریں!');
+                return;
+            }
+
+            let entryId = 'manual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            database.push({ id: entryId, date, item, mod, price });
+            database.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem('madrasa_db', JSON.stringify(database));
+            
+            document.getElementById('entryItem').value = '';
+            document.getElementById('entryPrice').value = '';
+            alert('انٹری کامیابی کے ساتھ محفوظ ہو گئی!');
+        }
+
+        function addBankEntry() {
+            let date = document.getElementById('bankEntryDate').value;
+            let acc = document.getElementById('bankEntryAcc').value;
+            let item = document.getElementById('bankEntryItem').value;
+            let mod = document.getElementById('bankEntryMod').value;
+            let price = parseFloat(document.getElementById('bankEntryPrice').value);
+
+            if(!date || !acc || !item || !mod || isNaN(price)) {
+                alert('براہ کرم تمام خانے اچھے سے پُر کریں!');
+                return;
+            }
+
+            let entryId = 'bank_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            bankDatabase.push({ id: entryId, date, acc, item, mod, price });
+            bankDatabase.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem('madrasa_bank_db', JSON.stringify(bankDatabase));
+            
+            document.getElementById('bankEntryItem').value = '';
+            document.getElementById('bankEntryPrice').value = '';
+            alert('بینک انٹری کامیابی کے ساتھ محفوظ ہو گئی!');
+        }
+
+        function renderTable(data) {
+            let sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+            let tbody = document.getElementById('dbTableBody');
+            tbody.innerHTML = '';
+            
+            let grandTotal = 0;
+            let modTotals = {};
+
+            sortedData.forEach((row, index) => {
+                let p = parseFloat(row.price) || 0;
+                grandTotal += p;
+                if(!modTotals[row.mod]) {
+                    modTotals[row.mod] = 0;
+                }
+                modTotals[row.mod] += p;
+
+                let formattedDate = formatDateUK(row.date);
+                let rowId = row.id || '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${formattedDate}</td>
+                        <td>${itemSafe(row.item)}</td>
+                        <td>${row.mod}</td>
+                        <td>${row.price}</td>
+                        <td><button class="btn btn-danger" onclick="deleteEntry('${rowId}', '${row.date}', '${itemSafe(row.item)}')">حذف</button></td>
+                    </tr>
+                `;
+            });
+
+            let summaryHtml = `<div class="summary-line"><span>کل خرچہ:</span> <span><strong>${grandTotal} روپے</strong></span></div>`;
+            for(let m in modTotals) {
+                summaryHtml += `<div class="summary-line"><span>${m}:</span> <span><strong>${modTotals[m]} روپے</strong></span></div>`;
+            }
+            document.getElementById('summaryContent').innerHTML = summaryHtml;
+        }
+
+        function renderBankTable(data) {
+            let sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+            let tbody = document.getElementById('bankDbTableBody');
+            tbody.innerHTML = '';
+            
+            let grandTotal = 0;
+            let modTotals = {};
+            let accTotals = { SB: 0, CD: 0 };
+
+            sortedData.forEach((row, index) => {
+                let p = parseFloat(row.price) || 0;
+                grandTotal += p;
+                if(!modTotals[row.mod]) {
+                    modTotals[row.mod] = 0;
+                }
+                modTotals[row.mod] += p;
+
+                if(row.acc && accTotals[row.acc] !== undefined) {
+                    accTotals[row.acc] += p;
+                }
+
+                let formattedDate = formatDateUK(row.date);
+                let rowId = row.id || '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${formattedDate}</td>
+                        <td><strong>${row.acc}</strong></td>
+                        <td>${itemSafe(row.item)}</td>
+                        <td>${row.mod}</td>
+                        <td>${row.price}</td>
+                        <td><button class="btn btn-danger" onclick="deleteBankEntry('${rowId}')">حذف</button></td>
+                    </tr>
+                `;
+            });
+
+            let summaryHtml = `<div class="summary-line"><span>کل خرچہ:</span> <span><strong>${grandTotal} روپے</strong></span></div>`;
+            summaryHtml += `<div class="summary-line"><span>SB اکاؤنٹ کل:</span> <span><strong>${accTotals.SB} روپے</strong></span></div>`;
+            summaryHtml += `<div class="summary-line"><span>CD اکاؤنٹ کل:</span> <span><strong>${accTotals.CD} روپے</strong></span></div>`;
+            for(let m in modTotals) {
+                summaryHtml += `<div class="summary-line"><span>${m}:</span> <span><strong>${modTotals[m]} روپے</strong></span></div>`;
+            }
+            document.getElementById('bankSummaryContent').innerHTML = summaryHtml;
+        }
+
+        function itemSafe(str) {
+            return str.replace(/'/g, "\\'");
+        }
+
+        function deleteEntry(rowId, date, item) {
+            if(confirm('کیا آپ واقعی اس انٹری کو حذف کرنا چاہتے ہیں؟')) {
+                if(rowId && rowId !== '') {
+                    database = database.filter(row => row.id !== rowId);
+                } else {
+                    database = database.filter(row => !(row.date === date && row.item === item));
+                }
+                localStorage.setItem('madrasa_db', JSON.stringify(database));
+                filterData();
+            }
+        }
+
+        function deleteBankEntry(rowId) {
+            if(confirm('کیا آپ واقعی اس بینک انٹری کو حذف کرنا چاہتے ہیں؟')) {
+                bankDatabase = bankDatabase.filter(row => row.id !== rowId);
+                localStorage.setItem('madrasa_bank_db', JSON.stringify(bankDatabase));
+                filterBankData();
+            }
+        }
+
+        function filterData() {
+            let start = document.getElementById('filterStartDate').value;
+            let end = document.getElementById('filterEndDate').value;
+            let selectedMod = document.getElementById('filterMod').value;
+            let keyword = document.getElementById('searchKeyword').value.toLowerCase().trim();
+
+            let filtered = database.filter(row => {
+                if(start && row.date < start) return false;
+                if(end && row.date > end) return false;
+                if(selectedMod && row.mod !== selectedMod) return false;
+                if(keyword && !row.item.toLowerCase().includes(keyword)) return false;
+                return true;
+            });
+            renderTable(filtered);
+        }
+
+        function filterBankData() {
+            let start = document.getElementById('bankFilterStartDate').value;
+            let end = document.getElementById('bankFilterEndDate').value;
+            let selectedAcc = document.getElementById('bankFilterAcc').value;
+            let selectedMod = document.getElementById('bankFilterMod').value;
+            let keyword = document.getElementById('bankSearchKeyword').value.toLowerCase().trim();
+
+            let filtered = bankDatabase.filter(row => {
+                if(start && row.date < start) return false;
+                if(end && row.date > end) return false;
+                if(selectedAcc && row.acc !== selectedAcc) return false;
+                if(selectedMod && row.mod !== selectedMod) return false;
+                if(keyword && !row.item.toLowerCase().includes(keyword)) return false;
+                return true;
+            });
+            renderBankTable(filtered);
+        }
+
+        function filterByMonth() {
+            let monthVal = document.getElementById('reportMonthInput').value;
+            if (!monthVal) return;
+
+            let filtered = database.filter(row => {
+                return row.date && row.date.startsWith(monthVal);
+            });
+            renderTable(filtered);
+        }
+
+        function filterBankByMonth() {
+            let monthVal = document.getElementById('bankReportMonthInput').value;
+            if (!monthVal) return;
+
+            let filtered = bankDatabase.filter(row => {
+                return row.date && row.date.startsWith(monthVal);
+            });
+            renderBankTable(filtered);
+        }
+
+        function resetReportFilter() {
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            document.getElementById('filterMod').value = '';
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('reportMonthInput').value = '';
+            renderTable(database);
+        }
+
+        function resetBankReportFilter() {
+            document.getElementById('bankFilterStartDate').value = '';
+            document.getElementById('bankFilterEndDate').value = '';
+            document.getElementById('bankFilterAcc').value = '';
+            document.getElementById('bankFilterMod').value = '';
+            document.getElementById('bankSearchKeyword').value = '';
+            document.getElementById('bankReportMonthInput').value = '';
+            renderBankTable(bankDatabase);
+        }
+
+        function openExportModal() {
+            document.getElementById('exportModal').style.display = 'block';
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+
+        function confirmExportData() {
+            let exportType = document.getElementById('exportTypeSelect').value;
+            let userName = document.getElementById('exportUserName').value.trim();
+            if (!userName) {
+                alert('براہ کرم اپنا نام درج کریں!');
+                return;
+            }
+
+            let start = document.getElementById('exportStartDate').value;
+            let end = document.getElementById('exportEndDate').value;
+
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let yyyy = today.getFullYear();
+            let currentDateStr = `${dd}.${mm}.${yyyy}`;
+
+            let backupData = {};
+            let fileName = '';
+
+            if (exportType === 'bank') {
+                let exportFilteredBankDb = bankDatabase.filter(row => {
+                    if (start && row.date < start) return false;
+                    if (end && row.date > end) return false;
+                    return true;
+                });
+
+                if (exportFilteredBankDb.length === 0) {
+                    alert('منتخب کردہ تاریخوں میں کوئی بینک ڈیٹا موجود نہیں ہے!');
+                    return;
+                }
+
+                backupData = {
+                    type: 'bank',
+                    database: exportFilteredBankDb,
+                    categories: categories,
+                    customHeading: customHeading
+                };
+                fileName = `${userName}_bank_${currentDateStr}.json`;
+            } else {
+                let exportFilteredDb = database.filter(row => {
+                    if (start && row.date < start) return false;
+                    if (end && row.date > end) return false;
+                    return true;
+                });
+
+                if (exportFilteredDb.length === 0) {
+                    alert('منتخب کردہ تاریخوں میں کوئی نقد ڈیٹا موجود نہیں ہے!');
+                    return;
+                }
+
+                backupData = {
+                    type: 'naqd',
+                    database: exportFilteredDb,
+                    categories: categories,
+                    customHeading: customHeading
+                };
+                fileName = `${userName}_naqd_${currentDateStr}.json`;
+            }
+
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            closeExportModal();
+        }
+
+        function openImportHistoryModal() {
+            let container = document.getElementById('historyListContainer');
+            container.innerHTML = '';
+
+            if (importHistory.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 15px;">کوئی امپورٹ ہسٹری موجود نہیں ہے</p>';
+            } else {
+                importHistory.forEach((hist, index) => {
+                    let formattedImportDate = formatDateUK(hist.importDate.slice(0, 10));
+                    container.innerHTML += `
+                        <div style="background: #fdf3e6; border: 1px solid #f3d1b0; padding: 10px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                            <div>
+                                <strong>فائل کا نام:</strong> ${hist.fileName}<br>
+                                <span style="font-size: 11px; color: #555;">امپورٹ کی تاریخ: ${formattedImportDate} (${hist.entries.length} انٹریز)</span>
+                            </div>
+                            <button class="btn btn-danger" onclick="deleteImportHistory(${index})">حذف کریں</button>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('importHistoryModal').style.display = 'block';
+        }
+
+        function closeImportHistoryModal() {
+            document.getElementById('importHistoryModal').style.display = 'none';
+        }
+
+        function deleteImportHistory(index) {
+            if (confirm('کیا آپ اس امپورٹ ہسٹری اور اس کی صرف متعلقہ انٹریز کو حذف کرنا چاہتے ہیں؟')) {
+                let targetHist = importHistory[index];
+                let targetIds = new Set(targetHist.entries.map(e => e.id));
+                
+                database = database.filter(row => !targetIds.has(row.id));
+                bankDatabase = bankDatabase.filter(row => !targetIds.has(row.id));
+                localStorage.setItem('madrasa_db', JSON.stringify(database));
+                localStorage.setItem('madrasa_bank_db', JSON.stringify(bankDatabase));
+
+                importHistory.splice(index, 1);
+                localStorage.setItem('madrasa_import_history', JSON.stringify(importHistory));
+
+                renderTable(database);
+                renderBankTable(bankDatabase);
+                openImportHistoryModal();
+                alert('امپورٹ شدہ ریکارڈ کامیابی سے حذف کر دیا گیا ہے!');
+            }
+        }
+
+        function importDataFile(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let importedObj = JSON.parse(e.target.result);
+                    if (importedObj.database && Array.isArray(importedObj.database)) {
+                        if (confirm('کیا آپ اس بیک اپ فائل سے ڈیٹا امپورٹ کرنا چاہتے ہیں؟')) {
+                            let rawEntries = importedObj.database;
+                            let isBankFile = (importedObj.type === 'bank') || file.name.toLowerCase().includes('_bank_');
+
+                            let allNewEntries = [];
+
+                            if (isBankFile) {
+                                let newBankEntriesWithIds = rawEntries.map(entry => {
+                                    return {
+                                        id: entry.id || ('impb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+                                        date: entry.date,
+                                        acc: entry.acc || 'SB',
+                                        item: entry.item,
+                                        mod: entry.mod,
+                                        price: entry.price
+                                    };
+                                });
+                                bankDatabase = bankDatabase.concat(newBankEntriesWithIds);
+                                bankDatabase.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                localStorage.setItem('madrasa_bank_db', JSON.stringify(bankDatabase));
+                                allNewEntries = allNewEntries.concat(newBankEntriesWithIds);
+                            } else {
+                                let newNaqdEntriesWithIds = rawEntries.map(entry => {
+                                    return {
+                                        id: entry.id || ('imp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5)),
+                                        date: entry.date,
+                                        item: entry.item,
+                                        mod: entry.mod,
+                                        price: entry.price
+                                    };
+                                });
+                                database = database.concat(newNaqdEntriesWithIds);
+                                database.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                localStorage.setItem('madrasa_db', JSON.stringify(database));
+                                allNewEntries = allNewEntries.concat(newNaqdEntriesWithIds);
+                            }
+
+                            let today = new Date().toISOString();
+                            importHistory.push({
+                                fileName: file.name,
+                                importDate: today,
+                                entries: allNewEntries
+                            });
+                            localStorage.setItem('madrasa_import_history', JSON.stringify(importHistory));
+
+                            if (importedObj.categories && Array.isArray(importedObj.categories)) {
+                                categories = importedObj.categories;
+                                localStorage.setItem('madrasa_cats', JSON.stringify(categories));
+                            }
+
+                            if (importedObj.customHeading) {
+                                customHeading = importedObj.customHeading;
+                                localStorage.setItem('madrasa_heading', customHeading);
+                                document.getElementById('settingBillHeading').value = customHeading;
+                            }
+
+                            renderTable(database);
+                            renderBankTable(bankDatabase);
+                            updateCategoryDropdowns();
+                            alert('فائل کامیابی سے امپورٹ اور ہسٹری میں محفوظ ہو گئی ہے!');
+                        }
+                    } else {
+                        alert('غلط فائل فارمیٹ! براہ کرم درست بیک اپ فائل منتخب کریں۔');
+                    }
+                } catch (err) {
+                    alert('فائل پڑھنے میں خرابی پیش آئی!');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function saveHeading() {
+            let heading = document.getElementById('settingBillHeading').value;
+            if(!heading) {
+                alert('ہیڈنگ خالی نہیں ہو سکتی!');
+                return;
+            }
+            customHeading = heading;
+            localStorage.setItem('madrasa_heading', customHeading);
+            alert('بل کی ہیڈنگ کامیابی سے محفوظ کر دی گئی ہے!');
+        }
+
+        let pendingNewPass = '';
+
+        function changePassword() {
+            let newPass = document.getElementById('newPassword').value;
+
+            if(newPass === '') {
+                appPassword = '';
+                localStorage.removeItem('madrasa_pass');
+                document.getElementById('newPassword').value = '';
+                updateSettingsPasswordUI();
+                alert('پاسورڈ کامیابی سے آف کر دیا گیا ہے!');
+                return;
+            }
+
+            if(appPassword && appPassword !== '') {
+                pendingNewPass = newPass;
+                document.getElementById('modalVerifyOldPass').value = '';
+                document.getElementById('passChangeModal').style.display = 'block';
+            } else {
+                pendingNewPass = newPass;
+                if(!appAadhaar || appAadhaar === '') {
+                    document.getElementById('modalAadhaarInput').value = '';
+                    document.getElementById('aadhaarPromptModal').style.display = 'block';
+                } else {
+                    appPassword = pendingNewPass;
+                    localStorage.setItem('madrasa_pass', appPassword);
+                    document.getElementById('newPassword').value = '';
+                    updateSettingsPasswordUI();
+                    alert('پاسورڈ کامیابی سے محفوظ ہو گیا ہے!');
+                }
+            }
+        }
+
+        function closeAadhaarPromptModal() {
+            document.getElementById('aadhaarPromptModal').style.display = 'none';
+        }
+
+        function confirmAndSavePasswordWithAadhaar() {
+            let inputAadhaar = document.getElementById('modalAadhaarInput').value.trim();
+            if(!inputAadhaar) {
+                alert('براہ کرم نمبر درج کریں!');
+                return;
+            }
+            appAadhaar = inputAadhaar;
+            localStorage.setItem('madrasa_aadhaar', appAadhaar);
+            document.getElementById('settingAadhaarInput').value = appAadhaar;
+
+            appPassword = pendingNewPass;
+            localStorage.setItem('madrasa_pass', appPassword);
+            document.getElementById('newPassword').value = '';
+            closeAadhaarPromptModal();
+            updateSettingsPasswordUI();
+            alert('پاسورڈ اور نمبر کامیابی سے محفوظ ہو گئے ہیں!');
+        }
+
+        function closePassChangeModal() {
+            document.getElementById('passChangeModal').style.display = 'none';
+        }
+
+        function verifyAndSavePassword() {
+            let oldInput = document.getElementById('modalVerifyOldPass').value;
+            if(oldInput !== appPassword) {
+                alert('موجودہ پرانا پاسورڈ غلط ہے!');
+                return;
+            }
+
+            appPassword = pendingNewPass;
+            localStorage.setItem('madrasa_pass', appPassword);
+
+            document.getElementById('newPassword').value = '';
+            closePassChangeModal();
+            updateSettingsPasswordUI();
+            alert('پاسورڈ کامیابی سے تبدیل ہو گیا ہے!');
+        }
+
+        function updateAadhaarNo() {
+            let newAadhaar = document.getElementById('settingAadhaarInput').value.trim();
+            if(!newAadhaar) {
+                alert('نمبر خالی نہیں ہو سکتا!');
+                return;
+            }
+            appAadhaar = newAadhaar;
+            localStorage.setItem('madrasa_aadhaar', appAadhaar);
+            alert('نمبر کامیابی سے اپڈیٹ کر دیا گیا ہے!');
+        }
+
+        function adminReset() {
+            let admPass = document.getElementById('adminPassword').value;
+            if(admPass === 'ADMIN') {
+                if(confirm('کیا آپ تمام ڈیٹا، پاسورڈ اور انٹریز کو مکمل ختم کرنا چاہتے ہیں؟')) {
+                    database = [];
+                    bankDatabase = [];
+                    importHistory = [];
+                    appPassword = '';
+                    appAadhaar = '';
+                    customHeading = 'بل بنام دارالعلوم رحمانیہ سلیالو کوریگام قاضی گنڈ';
+                    categories = ["مطبخ", "سفر", "تعمیر", "كتب خانہ"];
+                    localStorage.removeItem('madrasa_db');
+                    localStorage.removeItem('madrasa_bank_db');
+                    localStorage.removeItem('madrasa_import_history');
+                    localStorage.removeItem('madrasa_pass');
+                    localStorage.removeItem('madrasa_aadhaar');
+                    localStorage.removeItem('madrasa_heading');
+                    localStorage.removeItem('madrasa_cats');
+                    renderTable(database);
+                    renderBankTable(bankDatabase);
+                    alert('تمام ڈیٹا ری سیٹ کر دیا گیا ہے!');
+                    location.reload();
+                }
+            } else {
+                alert('غلط ADMIN پاسورڈ!');
+            }
+        }
+
+        function openPdfModal() {
+            document.getElementById('pdfModal').style.display = 'block';
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').style.display = 'none';
+        }
+
+        function openBankPdfModal() {
+            document.getElementById('bankPdfModal').style.display = 'block';
+        }
+
+        function closeBankPdfModal() {
+            document.getElementById('bankPdfModal').style.display = 'none';
+        }
+
+        function closeBillPreview() {
+            document.getElementById('billPreviewModal').style.display = 'none';
+        }
+
+        function generateBillsPDF() {
+            let start = document.getElementById('pdfStartDate').value;
+            let end = document.getElementById('pdfEndDate').value;
+            let moarif = document.getElementById('pdfMoarif').value;
+            let startBillNo = parseInt(document.getElementById('pdfStartBillNo').value) || 1;
+
+            let filtered = database.filter(row => {
+                if(start && row.date < start) return false;
+                if(end && row.date > end) return false;
+                return true;
+            });
+
+            if(filtered.length === 0) {
+                alert('منتخب کردہ تاریخوں میں کوئی ڈیٹا موجود نہیں ہے!');
+                return;
+            }
+
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+            closePdfModal();
+
+            let monthGroups = {};
+            filtered.forEach(item => {
+                let monthKey = item.date.slice(0, 7);
+                if (!monthGroups[monthKey]) {
+                    monthGroups[monthKey] = [];
+                }
+                monthGroups[monthKey].push(item);
+            });
+
+            let itemChunks = [];
+            Object.keys(monthGroups).sort().forEach(monthKey => {
+                let monthItems = monthGroups[monthKey];
+                for (let i = 0; i < monthItems.length; i += 10) {
+                    itemChunks.push(monthItems.slice(i, i + 10));
+                }
+            });
+
+            let billsArea = document.getElementById('billsArea');
+            billsArea.innerHTML = '';
+
+            for (let pIdx = 0; pIdx < itemChunks.length; pIdx += 4) {
+                let pageContainer = document.createElement('div');
+                pageContainer.className = 'page-container';
+
+                for (let b = 0; b < 4; b++) {
+                    let chunkIndex = pIdx + b;
+                    if (chunkIndex < itemChunks.length) {
+                        let chunk = itemChunks[chunkIndex];
+                        let currentBillNo = startBillNo + chunkIndex;
+                        let title = customHeading;
+
+                        let categoryTotals = {};
+                        let totalPrice = 0;
+
+                        chunk.forEach(item => {
+                            let p = parseFloat(item.price) || 0;
+                            totalPrice += p;
+                            if(!categoryTotals[item.mod]) {
+                                categoryTotals[item.mod] = 0;
+                            }
+                            categoryTotals[item.mod] += p;
+                        });
+
+                        let mods = Object.keys(categoryTotals);
+                        let amounts = Object.values(categoryTotals);
+
+                        let tableRows = '';
+                        for (let i = 0; i < 10; i++) {
+                            let npMod = mods[i] !== undefined ? mods[i] : '';
+                            let npAmount = amounts[i] !== undefined ? amounts[i] : '';
+                            
+                            if (i < chunk.length) {
+                                let item = chunk[i];
+                                let formattedItemDate = formatDateUK(item.date);
+                                tableRows += `
+                                    <tr>
+                                        <td>${formattedItemDate}</td>
+                                        <td>${item.item}</td>
+                                        <td>${item.mod}</td>
+                                        <td>${item.price}</td>
+                                        <td>${npMod}</td>
+                                        <td>${npAmount}</td>
+                                    </tr>
+                                `;
+                            } else {
+                                tableRows += `
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>${npMod}</td>
+                                        <td>${npAmount}</td>
+                                    </tr>
+                                `;
+                            }
+                        }
+
+                        pageContainer.innerHTML += `
+                            <div class="bill-card">
+                                <div>
+                                    <div class="bill-header">${title}</div>
+                                    <div class="bill-meta">
+                                        <span>تاریخ اندراج دفتر: ........................</span>
+                                        <span>بل نمبر: ${currentBillNo}</span>
+                                    </div>
+                                    <div class="bill-moarif">معرفت: ${moarif}</div>
+                                    <table class="bill-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 17%;">تاریخ</th>
+                                                <th rowspan="2" style="width: 27%;">نام اشیاء</th>
+                                                <th rowspan="2" style="width: 14%;">مد</th>
+                                                <th rowspan="2" style="width: 14%;">قیمت</th>
+                                                <th colspan="2" style="width: 28%;">میزان مدات</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 13%;">مد</th>
+                                                <th style="width: 15%;">میزان</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${tableRows}
+                                            <tr class="total-row">
+                                                <td colspan="3" style="text-align: right; padding-right: 4px;">کل میزان</td>
+                                                <td>${totalPrice}</td>
+                                                <td></td>
+                                                <td>${totalPrice}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="signatures">
+                                    <span>دستخط وصول کننده</span>
+                                    <span>دستخط ادا کننده</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        pageContainer.innerHTML += `<div class="bill-card" style="visibility: hidden;"></div>`;
+                    }
+                }
+                billsArea.appendChild(pageContainer);
+            }
+
+            document.getElementById('billPreviewModal').style.display = 'block';
+        }
+
+        function generateBankBillsPDF() {
+            let start = document.getElementById('bankPdfStartDate').value;
+            let end = document.getElementById('bankPdfEndDate').value;
+            let selectedAcc = document.getElementById('bankPdfAcc').value;
+            let moarif = document.getElementById('bankPdfMoarif').value;
+            let startBillNo = parseInt(document.getElementById('bankPdfStartBillNo').value) || 1;
+
+            let filtered = bankDatabase.filter(row => {
+                if(start && row.date < start) return false;
+                if(end && row.date > end) return false;
+                if(selectedAcc && row.acc !== selectedAcc) return false;
+                return true;
+            });
+
+            if(filtered.length === 0) {
+                alert('منتخب کردہ تاریخوں میں کوئی ڈیٹا موجود نہیں ہے!');
+                return;
+            }
+
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+            closeBankPdfModal();
+
+            let monthGroups = {};
+            filtered.forEach(item => {
+                let monthKey = item.date.slice(0, 7);
+                if (!monthGroups[monthKey]) {
+                    monthGroups[monthKey] = [];
+                }
+                monthGroups[monthKey].push(item);
+            });
+
+            let itemChunks = [];
+            Object.keys(monthGroups).sort().forEach(monthKey => {
+                let monthItems = monthGroups[monthKey];
+                for (let i = 0; i < monthItems.length; i += 10) {
+                    itemChunks.push(monthItems.slice(i, i + 10));
+                }
+            });
+
+            let billsArea = document.getElementById('billsArea');
+            billsArea.innerHTML = '';
+
+            for (let pIdx = 0; pIdx < itemChunks.length; pIdx += 4) {
+                let pageContainer = document.createElement('div');
+                pageContainer.className = 'page-container';
+
+                for (let b = 0; b < 4; b++) {
+                    let chunkIndex = pIdx + b;
+                    if (chunkIndex < itemChunks.length) {
+                        let chunk = itemChunks[chunkIndex];
+                        let currentBillNo = startBillNo + chunkIndex;
+                        let title = customHeading;
+
+                        let categoryTotals = {};
+                        let totalPrice = 0;
+
+                        chunk.forEach(item => {
+                            let p = parseFloat(item.price) || 0;
+                            totalPrice += p;
+                            if(!categoryTotals[item.mod]) {
+                                categoryTotals[item.mod] = 0;
+                            }
+                            categoryTotals[item.mod] += p;
+                        });
+
+                        let mods = Object.keys(categoryTotals);
+                        let amounts = Object.values(categoryTotals);
+
+                        let tableRows = '';
+                        for (let i = 0; i < 10; i++) {
+                            let npMod = mods[i] !== undefined ? mods[i] : '';
+                            let npAmount = amounts[i] !== undefined ? amounts[i] : '';
+                            
+                            if (i < chunk.length) {
+                                let item = chunk[i];
+                                let formattedItemDate = formatDateUK(item.date);
+                                let itemNameWithAcc = `${item.item}. ${item.acc}`;
+                                tableRows += `
+                                    <tr>
+                                        <td>${formattedItemDate}</td>
+                                        <td>${itemNameWithAcc}</td>
+                                        <td>${item.mod}</td>
+                                        <td>${item.price}</td>
+                                        <td>${npMod}</td>
+                                        <td>${npAmount}</td>
+                                    </tr>
+                                `;
+                            } else {
+                                tableRows += `
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>${npMod}</td>
+                                        <td>${npAmount}</td>
+                                    </tr>
+                                `;
+                            }
+                        }
+
+                        pageContainer.innerHTML += `
+                            <div class="bill-card">
+                                <div>
+                                    <div class="bill-header">${title}</div>
+                                    <div class="bill-meta">
+                                        <span>تاریخ اندراج دفتر: ........................</span>
+                                        <span>بل نمبر: ${currentBillNo}</span>
+                                    </div>
+                                    <div class="bill-moarif">معرفت: ${moarif}</div>
+                                    <table class="bill-table">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 17%;">تاریخ</th>
+                                                <th rowspan="2" style="width: 27%;">نام اشیاء</th>
+                                                <th rowspan="2" style="width: 14%;">مد</th>
+                                                <th rowspan="2" style="width: 14%;">قیمت</th>
+                                                <th colspan="2" style="width: 28%;">میزان مدات</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 13%;">مد</th>
+                                                <th style="width: 15%;">میزان</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${tableRows}
+                                            <tr class="total-row">
+                                                <td colspan="3" style="text-align: right; padding-right: 4px;">کل میزان</td>
+                                                <td>${totalPrice}</td>
+                                                <td></td>
+                                                <td>${totalPrice}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="signatures">
+                                    <span>دستخط وصول کننده</span>
+                                    <span>دستخط ادا کننده</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        pageContainer.innerHTML += `<div class="bill-card" style="visibility: hidden;"></div>`;
+                    }
+                }
+                billsArea.appendChild(pageContainer);
+            }
+
+            document.getElementById('billPreviewModal').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
